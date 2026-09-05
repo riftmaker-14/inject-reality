@@ -1,0 +1,32 @@
+name: Auto Update RobustToolbox Engine
+
+on:
+  schedule:
+    - cron: '0 4 * * *' 
+  workflow_dispatch:
+
+jobs:
+  update-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update RobustToolbox submodule
+        run: |
+          git submodule update --remote --merge RobustToolbox
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add RobustToolbox
+            git commit -m "Chore: автоматически обновлен движок RobustToolbox до актуальной версии"
+            git push
+          else
+            echo "Обновлений движка не обнаружено."
+          fi
